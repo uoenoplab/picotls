@@ -72,7 +72,7 @@ extern ptls_key_exchange_algorithm_t ptls_openssl_x25519;
 #endif
 
 extern ptls_key_exchange_algorithm_t *ptls_openssl_key_exchanges[];
-
+extern ptls_key_exchange_algorithm_t ptls_openssl_x25519;
 extern ptls_cipher_algorithm_t ptls_openssl_aes128ecb;
 extern ptls_cipher_algorithm_t ptls_openssl_aes128ctr;
 extern ptls_aead_algorithm_t ptls_openssl_aes128gcm;
@@ -212,7 +212,6 @@ int ptls_openssl_decrypt_ticket_evp(ptls_buffer_t *dst, ptls_iovec_t src,
 extern int do_sign(EVP_PKEY *key, const ptls_openssl_signature_scheme_t *scheme, ptls_buffer_t *outbuf,
                    ptls_iovec_t input, ptls_async_job_t **async);
 extern const ptls_openssl_signature_scheme_t secp256r1_signature_schemes[];
-
 
 
 #ifdef __cplusplus
