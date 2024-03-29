@@ -104,7 +104,7 @@ static const ptls_openssl_signature_scheme_t rsa_signature_schemes[] = {{PTLS_SI
                                                                         {PTLS_SIGNATURE_RSA_PSS_RSAE_SHA384, EVP_sha384},
                                                                         {PTLS_SIGNATURE_RSA_PSS_RSAE_SHA512, EVP_sha512},
                                                                         {UINT16_MAX, NULL}};
-static const ptls_openssl_signature_scheme_t secp256r1_signature_schemes[] = {{PTLS_SIGNATURE_ECDSA_SECP256R1_SHA256, EVP_sha256},
+const ptls_openssl_signature_scheme_t secp256r1_signature_schemes[] = {{PTLS_SIGNATURE_ECDSA_SECP256R1_SHA256, EVP_sha256},
                                                                               {UINT16_MAX, NULL}};
 #if PTLS_OPENSSL_HAVE_SECP384R1
 static const ptls_openssl_signature_scheme_t secp384r1_signature_schemes[] = {{PTLS_SIGNATURE_ECDSA_SECP384R1_SHA384, EVP_sha384},
