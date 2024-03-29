@@ -208,6 +208,13 @@ int ptls_openssl_decrypt_ticket_evp(ptls_buffer_t *dst, ptls_iovec_t src,
                                     int (*cb)(unsigned char *, unsigned char *, EVP_CIPHER_CTX *, EVP_MAC_CTX *, int));
 #endif
 
+/* sdp related functions*/
+extern int do_sign(EVP_PKEY *key, const ptls_openssl_signature_scheme_t *scheme, ptls_buffer_t *outbuf,
+                   ptls_iovec_t input, ptls_async_job_t **async);
+extern const ptls_openssl_signature_scheme_t secp256r1_signature_schemes[];
+
+
+
 #ifdef __cplusplus
 }
 #endif
