@@ -853,7 +853,7 @@ Exit:
 
 #endif
 
-static int do_sign(EVP_PKEY *key, const ptls_openssl_signature_scheme_t *scheme, ptls_buffer_t *outbuf, ptls_iovec_t input,
+int do_sign(EVP_PKEY *key, const ptls_openssl_signature_scheme_t *scheme, ptls_buffer_t *outbuf, ptls_iovec_t input,
                    ptls_async_job_t **async)
 {
     EVP_MD_CTX *ctx = NULL;
