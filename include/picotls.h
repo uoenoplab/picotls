@@ -2067,6 +2067,17 @@ inline void ptls_hash_clone_memcpy(void *dst, const void *src, size_t size)
         return &ctx->super;                                                                                                        \
     }
 
+    static void print_base(uint8_t *base, size_t len) {
+        for (size_t i = 0; i < len; ++i) {
+            PTLS_DEBUGF("%.2x ", (int)base[i]);
+            if (i % 4 == 3)
+                PTLS_DEBUGF(" ");
+            if (i %16 == 15)
+                PTLS_DEBUGF("\n");
+        }
+        PTLS_DEBUGF("\n");
+    }
+
 #ifdef __cplusplus
 }
 #endif
