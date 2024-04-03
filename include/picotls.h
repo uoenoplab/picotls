@@ -1034,7 +1034,7 @@ typedef struct st_ptls_handshake_properties_t {
             /**
              * indicate if the session_ticket is sdpticket @xinshu
              */
-             size_t use_sdp_ticket;
+             unsigned use_sdp_ticket: 0;
             /**
              * pointer to store the maximum size of early-data that can be sent immediately. If set to non-NULL, the first call to
              * ptls_handshake (or ptls_handle_message) will set `*max_early_data` to the value obtained from the session ticket, or
