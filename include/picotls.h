@@ -2073,7 +2073,7 @@ inline void ptls_hash_clone_memcpy(void *dst, const void *src, size_t size)
 extern int decode_session_identifier(uint64_t *issued_at, ptls_iovec_t *psk, uint32_t *ticket_age_add, ptls_iovec_t *ticket_ctx,
                                      uint16_t *key_exchange_id, uint16_t *csid, ptls_iovec_t *negotiated_protocol, const uint8_t *src,
                                      const uint8_t *const end);
-
+extern int derive_resumption_secret(ptls_key_schedule_t *sched, uint8_t *secret, ptls_iovec_t nonce);
 #ifdef __cplusplus
 }
 #endif
