@@ -911,6 +911,10 @@ struct st_ptls_context_t {
      */
     unsigned require_dhe_on_psk : 1;
     /**
+     * if set, psk handshakes use sdp_ticket
+     */
+     unsigned use_sdp_ticket_on_psk : 1;
+    /**
      * if exporter master secrets should be recorded
      */
     unsigned use_exporter : 1;
