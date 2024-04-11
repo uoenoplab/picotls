@@ -382,6 +382,16 @@ typedef const struct st_ptls_key_exchange_algorithm_t {
 } ptls_key_exchange_algorithm_t;
 
 /**
+ * a pre-generated key share list
+ */
+typedef struct st_sdp_key_shares_t{
+    ptls_key_exchange_algorithm_t *algo;
+    ptls_key_exchange_context_t **key_ex_ctx_list;
+    unsigned consumed_index; /*indicate how many key shares has been consumed*/
+    size_t num_key_shares;
+} sdp_key_shares_t;
+
+/**
  * context of a symmetric cipher
  */
 typedef struct st_ptls_cipher_context_t {
