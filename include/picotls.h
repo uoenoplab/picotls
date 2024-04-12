@@ -2080,10 +2080,6 @@ inline void ptls_hash_clone_memcpy(void *dst, const void *src, size_t size)
         init_func(&ctx->ctx);                                                                                                      \
         return &ctx->super;                                                                                                        \
     }
-/* sdp related functions*/
-extern int do_sign(EVP_PKEY *key, const ptls_openssl_signature_scheme_t *scheme, ptls_buffer_t *outbuf,
-                   ptls_iovec_t input, ptls_async_job_t **async);
-extern const ptls_openssl_signature_scheme_t secp256r1_signature_schemes[];
 
 extern int decode_session_identifier(uint64_t *issued_at, ptls_iovec_t *psk, uint32_t *ticket_age_add, ptls_iovec_t *ticket_ctx,
                                      uint16_t *key_exchange_id, uint16_t *csid, ptls_iovec_t *negotiated_protocol, const uint8_t *src,
