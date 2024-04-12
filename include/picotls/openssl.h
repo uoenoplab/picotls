@@ -46,7 +46,7 @@ extern "C" {
 #endif
 #endif
 
-extern ptls_key_exchange_algorithm_t ptls_openssl_secp256r1;
+
 
 #ifdef NID_secp384r1
 #define PTLS_OPENSSL_HAVE_SECP384R1 1
@@ -71,7 +71,7 @@ extern ptls_key_exchange_algorithm_t ptls_openssl_x25519;
 #if !defined(OPENSSL_NO_BF) || defined(OPENSSL_IS_BORINGSSL)
 #define PTLS_OPENSSL_HAVE_BF 1
 #endif
-
+extern ptls_key_exchange_algorithm_t ptls_openssl_secp256r1;
 extern ptls_key_exchange_algorithm_t *ptls_openssl_key_exchanges[];
 extern ptls_key_exchange_algorithm_t ptls_openssl_x25519;
 extern ptls_cipher_algorithm_t ptls_openssl_aes128ecb;
@@ -88,7 +88,7 @@ extern ptls_cipher_suite_t ptls_openssl_aes256gcmsha384;
 extern ptls_cipher_suite_t *ptls_openssl_cipher_suites[];
 extern ptls_cipher_suite_t *ptls_openssl_cipher_suites_all[];
 extern ptls_cipher_suite_t *ptls_openssl_tls12_cipher_suites[];
-
+extern ptls_openssl_signature_scheme_t secp256r1_signature_schemes[];
 #if PTLS_OPENSSL_HAVE_CHACHA20_POLY1305
 extern ptls_cipher_algorithm_t ptls_openssl_chacha20;
 extern ptls_aead_algorithm_t ptls_openssl_chacha20poly1305;
@@ -212,7 +212,6 @@ int ptls_openssl_decrypt_ticket_evp(ptls_buffer_t *dst, ptls_iovec_t src,
 /* sdp related functions*/
 extern int do_sign(EVP_PKEY *key, const ptls_openssl_signature_scheme_t *scheme, ptls_buffer_t *outbuf,
                    ptls_iovec_t input, ptls_async_job_t **async);
-extern const ptls_openssl_signature_scheme_t secp256r1_signature_schemes[];
 
 #ifdef __cplusplus
 }
