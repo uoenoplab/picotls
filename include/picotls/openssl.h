@@ -47,6 +47,7 @@ extern "C" {
 #endif
 
 extern ptls_key_exchange_algorithm_t ptls_openssl_secp256r1;
+
 #ifdef NID_secp384r1
 #define PTLS_OPENSSL_HAVE_SECP384R1 1
 #define PTLS_OPENSSL_HAS_SECP384R1 1 /* deprecated; use HAVE_ */
