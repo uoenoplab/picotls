@@ -764,7 +764,7 @@ PTLS_CALLBACK_TYPE(int, sign_certificate, ptls_t *tls, ptls_async_job_t **async,
 /**
  * when initialize server tls, the core calls the callback to generate sdpdata.
  */
-PTLS_CALLBACK_TYPE(int, gen_sdpdata, ptls_t *tls, int is_file);
+PTLS_CALLBACK_TYPE(int, gen_sdpdata, ptls_t *tls, ptls_context_t *ctx, int is_file);
 /**
  * after receiving Certificate, the core calls the callback to verify the certificate chain and to obtain a pointer to a
  * callback that should be used for verifying CertificateVerify. If an error occurs between a successful return from this
@@ -1601,6 +1601,14 @@ const char *ptls_get_negotiated_protocol(ptls_t *tls);
  * sets the negotiated protocol. If protocol_len is zero, strlen(protocol) is called to determine the length of the protocol name.
  */
 int ptls_set_negotiated_protocol(ptls_t *tls, const char *protocol, size_t protocol_len);
+/**
+ * returns sdp_key_share_ctx
+ */
+int ptls_get_sdp_key_share_ctx(ptls_t *tls, uint16_t *sdp_keyex_id, ptls_iovec_t *pubkey);
+/**
+  * creates sdp key share context
+  */
+int ptls_set_sdp_key_share_ctx(ptls_t *tls, ptls_key_exchange_algorithm_t *sdp_keyex_algo);
 /**
  * returns if the handshake has been completed
  */
