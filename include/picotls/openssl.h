@@ -88,7 +88,6 @@ extern ptls_cipher_suite_t ptls_openssl_aes256gcmsha384;
 extern ptls_cipher_suite_t *ptls_openssl_cipher_suites[];
 extern ptls_cipher_suite_t *ptls_openssl_cipher_suites_all[];
 extern ptls_cipher_suite_t *ptls_openssl_tls12_cipher_suites[];
-extern ptls_openssl_signature_scheme_t secp256r1_signature_schemes[];
 #if PTLS_OPENSSL_HAVE_CHACHA20_POLY1305
 extern ptls_cipher_algorithm_t ptls_openssl_chacha20;
 extern ptls_aead_algorithm_t ptls_openssl_chacha20poly1305;
@@ -140,6 +139,8 @@ typedef struct st_ptls_openssl_signature_scheme_t {
     uint16_t scheme_id;
     const EVP_MD *(*scheme_md)(void);
 } ptls_openssl_signature_scheme_t;
+
+extern const ptls_openssl_signature_scheme_t secp256r1_signature_schemes[];
 
 /**
  * Given a private key, returns a list of compatible signature schemes. This list is terminated by scheme_id of UINT16_MAX.
