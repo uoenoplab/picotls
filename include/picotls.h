@@ -766,6 +766,10 @@ PTLS_CALLBACK_TYPE(int, sign_certificate, ptls_t *tls, ptls_async_job_t **async,
  */
 PTLS_CALLBACK_TYPE(int, gen_sdpdata, ptls_t *tls, ptls_context_t *ctx, int is_save_to_file);
 /**
+ * when send client hello, the core calls the callback to decode sdpdata as the ticket to initiate 0-rtt connection
+ */
+PTLS_CALLBACK_TYPE(int, decode_sdpdata, ptls_t *tls, ptls_context_t *ctx);
+/**
  * after receiving Certificate, the core calls the callback to verify the certificate chain and to obtain a pointer to a
  * callback that should be used for verifying CertificateVerify. If an error occurs between a successful return from this
  * callback to the invocation of the verify_sign callback, verify_sign is called with both data and sign set to an empty buffer.
@@ -932,7 +936,10 @@ struct st_ptls_context_t {
      * callback to generate sdpdata @xinshu
      */
      ptls_gen_sdpdata_t *gen_sdpdata;
-
+    /**
+     * callback to decode sdpdata @xinshu
+     */
+     ptls_decode_sdpdata_t *decode_sdpdata;
     /**
      * if exporter master secrets should be recorded
      */
