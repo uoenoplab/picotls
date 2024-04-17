@@ -764,7 +764,7 @@ PTLS_CALLBACK_TYPE(int, sign_certificate, ptls_t *tls, ptls_async_job_t **async,
 /**
  * when initialize server tls, the core calls the callback to generate sdpdata.
  */
-PTLS_CALLBACK_TYPE(int, gen_sdpdata, ptls_t *tls, ptls_context_t *ctx, int is_file);
+PTLS_CALLBACK_TYPE(int, gen_sdpdata, ptls_t *tls, ptls_context_t *ctx, int is_save_to_file);
 /**
  * after receiving Certificate, the core calls the callback to verify the certificate chain and to obtain a pointer to a
  * callback that should be used for verifying CertificateVerify. If an error occurs between a successful return from this
