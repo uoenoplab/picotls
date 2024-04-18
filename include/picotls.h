@@ -1623,7 +1623,7 @@ int ptls_get_sdp_key_share_ctx(ptls_t *tls, uint16_t *sdp_keyex_id, ptls_iovec_t
 /**
   * creates server sdp key share context
   */
-int ptls_setup_sdp_key_share_ctx(ptls_t *tls, Uint64_t *issued_at);
+int ptls_setup_sdp_key_share_ctx(ptls_t *tls, uint64_t *issued_at);
 /**
  * setup keyex algo and cipher suites, creates client key share ctx
  */
