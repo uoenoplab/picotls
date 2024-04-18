@@ -940,6 +940,18 @@ struct st_ptls_context_t {
      * callback to decode sdpdata @xinshu
      */
      ptls_decode_sdpdata_t *decode_sdpdata;
+     /**
+      * server preferred sdp key exchange algo
+      */
+     ptls_key_exchange_algorithm_t *sdp_keyex_algo;
+     /**
+      * server preferred sdp cipher suite
+      */
+     ptls_cipher_suite_t *sdp_cs;
+     /**
+      * signature scheme that server used in sdpdata
+      */
+     ptls_openssl_signature_scheme_t *sdp_sign_scheme;
     /**
      * if exporter master secrets should be recorded
      */
@@ -1621,6 +1633,10 @@ int ptls_set_sdp_key_share_ctx(ptls_t *tls, ptls_key_exchange_algorithm_t *sdp_k
  */
 int ptls_setup_sdp_secret(ptls_t *tls, ptls_key_exchange_algorithm_t *keyex_algo, ptls_cipher_suite_t *cs,
                              ptls_iovec_t peer_pubkey);
+/**
+ * TODO:client creates sdp_ticket based on sdpdata
+ */
+ int ptls_gen_sdp_ticket(ptls_t *tls);
 /**
  * returns if the handshake has been completed
  */
