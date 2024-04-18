@@ -941,15 +941,15 @@ struct st_ptls_context_t {
      */
      ptls_decode_sdpdata_t *decode_sdpdata;
      /**
-      * server preferred sdp key exchange algo
+      * server preferred sdp key exchange algo @xinshu
       */
      ptls_key_exchange_algorithm_t *sdp_keyex_algo;
      /**
-      * server preferred sdp cipher suite
+      * server preferred sdp cipher suite@xinshu
       */
      ptls_cipher_suite_t *sdp_cs;
      /**
-      * signature scheme that server used in sdpdata
+      * signature scheme that server used in sdpdata@xinshu
       */
      ptls_openssl_signature_scheme_t *sdp_sign_scheme;
     /**
@@ -1627,7 +1627,7 @@ int ptls_get_sdp_key_share_ctx(ptls_t *tls, uint16_t *sdp_keyex_id, ptls_iovec_t
 /**
   * creates server sdp key share context
   */
-int ptls_set_sdp_key_share_ctx(ptls_t *tls, ptls_key_exchange_algorithm_t *sdp_keyex_algo);
+int ptls_setup_sdp_key_share_ctx(ptls_t *tls);
 /**
  * setup keyex algo and cipher suites, creates client key share ctx
  */
