@@ -948,10 +948,6 @@ struct st_ptls_context_t {
       * server preferred sdp cipher suite@xinshu
       */
      ptls_cipher_suite_t *sdp_cs;
-     /**
-      * signature scheme that server used in sdpdata@xinshu
-      */
-     ptls_openssl_signature_scheme_t *sdp_sign_scheme;
     /**
      * if exporter master secrets should be recorded
      */
