@@ -1623,7 +1623,7 @@ int ptls_get_sdp_key_share_ctx(ptls_t *tls, uint16_t *sdp_keyex_id, ptls_iovec_t
 /**
   * creates server sdp key share context
   */
-int ptls_setup_sdp_key_share_ctx(ptls_t *tls);
+int ptls_setup_sdp_key_share_ctx(ptls_t *tls, Uint64_t *issued_at);
 /**
  * setup keyex algo and cipher suites, creates client key share ctx
  */
@@ -1632,7 +1632,7 @@ int ptls_setup_sdp_secret(ptls_t *tls, ptls_key_exchange_algorithm_t *keyex_algo
 /**
  * TODO:client creates sdp_ticket based on sdpdata
  */
- int ptls_gen_sdp_ticket(ptls_t *tls);
+ int ptls_gen_sdp_ticket(ptls_t *tls, uint64_t obtained_at);
 /**
  * returns if the handshake has been completed
  */
