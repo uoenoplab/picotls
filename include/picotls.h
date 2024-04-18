@@ -1620,7 +1620,7 @@ int ptls_set_sdp_key_share_ctx(ptls_t *tls, ptls_key_exchange_algorithm_t *sdp_k
  * setup keyex algo and cipher suites, creates client key share ctx
  */
 int ptls_setup_key_share_ctx(ptls_t *tls, ptls_key_exchange_algorithm_t *keyex_algo, ptls_cipher_suite_t *cs,
-                             ptls_iovec_t *peer_pubkey);
+                             ptls_iovec_t peer_pubkey);
 /**
  * returns if the handshake has been completed
  */
