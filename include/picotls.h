@@ -1613,9 +1613,14 @@ int ptls_set_negotiated_protocol(ptls_t *tls, const char *protocol, size_t proto
  */
 int ptls_get_sdp_key_share_ctx(ptls_t *tls, uint16_t *sdp_keyex_id, ptls_iovec_t *pubkey);
 /**
-  * creates sdp key share context
+  * creates server sdp key share context
   */
 int ptls_set_sdp_key_share_ctx(ptls_t *tls, ptls_key_exchange_algorithm_t *sdp_keyex_algo);
+/**
+ * setup keyex algo and cipher suites, creates client key share ctx
+ */
+int ptls_setup_key_share_ctx(ptls_t *tls, ptls_key_exchange_algorithm_t *keyex_algo, ptls_cipher_suite_t *cs,
+                             ptls_iovec_t peer_pubkey);
 /**
  * returns if the handshake has been completed
  */
