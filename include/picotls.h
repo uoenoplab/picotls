@@ -929,7 +929,7 @@ struct st_ptls_context_t {
      */
     unsigned require_dhe_on_psk : 1;
     /**
-     * if set, psk handshakes use sdp_ticket @xinshu
+     * if set, client initiates psk handshakes with sdp_ticket @xinshu
      */
      unsigned use_sdp_ticket_on_psk : 1;
     /**
