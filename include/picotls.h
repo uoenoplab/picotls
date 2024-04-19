@@ -933,6 +933,10 @@ struct st_ptls_context_t {
      */
      unsigned use_sdp_ticket_on_psk : 1;
     /**
+     * if set, server pre-gen key shares @xinshu, in sdp mode, client's key share is pregenerated anyway.
+     */
+     unsigned use_pre_gen_key_share : 1;
+    /**
      * callback to generate sdpdata @xinshu
      */
      ptls_gen_sdpdata_t *gen_sdpdata;
