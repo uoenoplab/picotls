@@ -953,6 +953,14 @@ struct st_ptls_context_t {
       * server preferred sdp cipher suite@xinshu
       */
      ptls_cipher_suite_t *sdp_cs;
+     /**
+      * server sdp key share context
+      */
+     ptls_key_exchange_context_t *sdp_key_ctx;
+     /**
+      * server sdpdata id (issue_at)
+      */
+     uint64_t sdp_issue_at;
     /**
      * if exporter master secrets should be recorded
      */
