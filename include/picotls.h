@@ -306,6 +306,7 @@ extern "C" {
 
 #define PTLS_TO__STR(n) #n
 #define PTLS_TO_STR(n) PTLS_TO__STR(n)
+#define PGKS_NUM 2
 
 typedef struct st_ptls_t ptls_t;
 typedef struct st_ptls_context_t ptls_context_t;
