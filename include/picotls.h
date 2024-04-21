@@ -944,7 +944,7 @@ struct st_ptls_context_t {
     /**
      * callback to decode sdpdata @xinshu
      */
-     ptls_decode_sdpdata_t *decode_sdpdata;
+     ptls_load_sdpdata_t *decode_sdpdata;
      /**
       * server preferred sdp key exchange algo @xinshu
       */
