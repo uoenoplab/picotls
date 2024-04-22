@@ -299,13 +299,31 @@ static int x9_62_on_exchange(ptls_key_exchange_context_t **_ctx, int release, pt
         goto Exit;
     }
 
+    struct timespec decode_start, decode_end;
+    clock_gettime(CLOCK_REALTIME, &decode_start);
+
     if ((peer_point = x9_62_decode_point(group, peerkey, ctx->bn_ctx)) == NULL) {
         ret = PTLS_ALERT_DECODE_ERROR;
         goto Exit;
     }
+    clock_gettime(CLOCK_REALTIME, &decode_end);
+
+
+
+    clock_gettime(CLOCK_REALTIME, &event_start);
+
     if ((ret = ecdh_calc_secret(secret, group, ctx->privkey, peer_point)) != 0)
         goto Exit;
+    clock_gettime(CLOCK_REALTIME, &event_end);
 
+
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double decode_time_spent = (decode_end.tv_sec - decode_start.tv_sec) * 1000000.0 + (decode_end.tv_nsec - decode_start.tv_nsec) / 1000.0;
+    double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
+    printf("[%s]: decode peer_pubkey: %lf us\n", __FUNCTION__, decode_time_spent);
+    printf("[%s]: ecdh_cal_secret: %lf us\n", __FUNCTION__, event_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
 Exit:
     if (peer_point != NULL)
         EC_POINT_free(peer_point);
