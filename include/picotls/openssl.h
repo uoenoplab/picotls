@@ -150,6 +150,7 @@ const ptls_openssl_signature_scheme_t *ptls_openssl_lookup_signature_schemes(EVP
  * Given available schemes and input, choses one, or returns NULL if none is available.
  */
 const ptls_openssl_signature_scheme_t *ptls_openssl_select_signature_scheme(const ptls_openssl_signature_scheme_t *available,
+
                                                                             const uint16_t *algorithms, size_t num_algorithms);
 
 typedef struct st_ptls_openssl_sign_certificate_t {
@@ -214,6 +215,9 @@ int ptls_openssl_decrypt_ticket_evp(ptls_buffer_t *dst, ptls_iovec_t src,
 extern int do_sign(EVP_PKEY *key, const ptls_openssl_signature_scheme_t *scheme, ptls_buffer_t *outbuf,
                    ptls_iovec_t input, ptls_async_job_t **async);
 extern EC_KEY *ecdh_gerenate_key(EC_GROUP *group);
+extern ptls_iovec_t x9_62_encode_point(const EC_GROUP *group, const EC_POINT *point, BN_CTX *bn_ctx);
+extern EC_POINT *x9_62_decode_point(const EC_GROUP *group, ptls_iovec_t vec, BN_CTX *bn_ctx);
+extern int ecdh_calc_secret(ptls_iovec_t *out, const EC_GROUP *group, EC_KEY *privkey, EC_POINT *peer_point);
 
 #ifdef __cplusplus
 }

@@ -215,7 +215,7 @@ EC_KEY *ecdh_gerenate_key(EC_GROUP *group)
     return key;
 }
 
-static int ecdh_calc_secret(ptls_iovec_t *out, const EC_GROUP *group, EC_KEY *privkey, EC_POINT *peer_point)
+int ecdh_calc_secret(ptls_iovec_t *out, const EC_GROUP *group, EC_KEY *privkey, EC_POINT *peer_point)
 {
     ptls_iovec_t secret;
     int ret;
@@ -241,7 +241,7 @@ Exit:
     return ret;
 }
 
-static EC_POINT *x9_62_decode_point(const EC_GROUP *group, ptls_iovec_t vec, BN_CTX *bn_ctx)
+EC_POINT *x9_62_decode_point(const EC_GROUP *group, ptls_iovec_t vec, BN_CTX *bn_ctx)
 {
     EC_POINT *point = NULL;
 
@@ -255,7 +255,7 @@ static EC_POINT *x9_62_decode_point(const EC_GROUP *group, ptls_iovec_t vec, BN_
     return point;
 }
 
-static ptls_iovec_t x9_62_encode_point(const EC_GROUP *group, const EC_POINT *point, BN_CTX *bn_ctx)
+ptls_iovec_t x9_62_encode_point(const EC_GROUP *group, const EC_POINT *point, BN_CTX *bn_ctx)
 {
     ptls_iovec_t vec;
 
@@ -1467,6 +1467,19 @@ Exit:
     EVP_PKEY_free(key);
     return ret;
 }
+
+/*@xinshu*/
+//int ptls_openssl_init_sdp_privkey(ptls_openssl_sign_certificate_t *self, EVP_PKEY *key)
+//{
+//    *self = (ptls_openssl_sign_certificate_t){.super = {sign_certificate}, .async = 0 /* libssl has it off by default too */};
+//
+//    if ((self->schemes = ptls_openssl_lookup_signature_schemes(key)) == NULL)
+//        return PTLS_ERROR_INCOMPATIBLE_KEY;
+//    EVP_PKEY_up_ref(key);
+//    self->key = key;
+//
+//    return 0;
+//}
 
 int ptls_openssl_init_sign_certificate(ptls_openssl_sign_certificate_t *self, EVP_PKEY *key)
 {
