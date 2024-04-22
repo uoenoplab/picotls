@@ -1633,10 +1633,10 @@ int ptls_set_negotiated_protocol(ptls_t *tls, const char *protocol, size_t proto
  * returns sdp_key_share_ctx
  */
 int ptls_get_sdp_key_share_ctx(ptls_t *tls, uint16_t *sdp_keyex_id, ptls_iovec_t *pubkey);
-/**
-  * creates server sdp key share context
-  */
-int ptls_setup_sdp_key_share_ctx(ptls_t *tls, uint64_t *issued_at);
+///**
+//  * creates server sdp key share context
+//  */
+//int ptls_setup_sdp_key_share_ctx(ptls_t *tls, uint64_t *issued_at);
 /**
  * setup keyex algo and cipher suites, creates client key share ctx
  */
