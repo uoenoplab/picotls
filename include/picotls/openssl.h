@@ -213,6 +213,7 @@ int ptls_openssl_decrypt_ticket_evp(ptls_buffer_t *dst, ptls_iovec_t src,
 /* sdp related functions*/
 extern int do_sign(EVP_PKEY *key, const ptls_openssl_signature_scheme_t *scheme, ptls_buffer_t *outbuf,
                    ptls_iovec_t input, ptls_async_job_t **async);
+extern EC_KEY *ecdh_gerenate_key(EC_GROUP *group);
 
 #ifdef __cplusplus
 }

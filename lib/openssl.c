@@ -201,7 +201,7 @@ void ptls_openssl_random_bytes(void *buf, size_t len)
     }
 }
 
-static EC_KEY *ecdh_gerenate_key(EC_GROUP *group)
+EC_KEY *ecdh_gerenate_key(EC_GROUP *group)
 {
     EC_KEY *key;
 
