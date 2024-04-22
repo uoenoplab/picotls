@@ -299,7 +299,7 @@ static int x9_62_on_exchange(ptls_key_exchange_context_t **_ctx, int release, pt
         goto Exit;
     }
 
-    struct timespec decode_start, decode_end;
+    struct timespec decode_start, decode_end, event_start, event_end;
     clock_gettime(CLOCK_REALTIME, &decode_start);
 
     if ((peer_point = x9_62_decode_point(group, peerkey, ctx->bn_ctx)) == NULL) {
