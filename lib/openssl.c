@@ -219,6 +219,9 @@ int ecdh_calc_secret(ptls_iovec_t *out, const EC_GROUP *group, EC_KEY *privkey, 
 {
     ptls_iovec_t secret;
     int ret;
+    struct timespec event_start, event_end;
+    clock_gettime(CLOCK_REALTIME, &event_start);
+
 
     secret.len = (EC_GROUP_get_degree(group) + 7) / 8;
     if ((secret.base = malloc(secret.len)) == NULL) {
@@ -238,6 +241,12 @@ Exit:
         free(secret.base);
         *out = (ptls_iovec_t){NULL};
     }
+    clock_gettime(CLOCK_REALTIME, &event_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
+    printf("[%s]: key exchange (on_exchange) (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
     return ret;
 }
 
@@ -372,6 +381,9 @@ static int x9_62_create_key_exchange(ptls_key_exchange_algorithm_t *algo, ptls_k
     EC_GROUP *group = NULL;
     struct st_x9_62_keyex_context_t *ctx = NULL;
     int ret;
+    struct timespec event_start, event_end;
+    clock_gettime(CLOCK_REALTIME, &event_start);
+
 
     /* FIXME use a global? */
     if ((group = EC_GROUP_new_by_curve_name((int)algo->data)) == NULL) {
@@ -398,6 +410,12 @@ Exit:
             x9_62_free_context(ctx);
         *_ctx = NULL;
     }
+    clock_gettime(CLOCK_REALTIME, &event_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
+    printf("[%s]: key generation %lf us\n", __FUNCTION__ , event_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
 
     return ret;
 }
@@ -486,6 +504,8 @@ static int secp_key_exchange(ptls_key_exchange_algorithm_t *algo, ptls_iovec_t *
     EC_GROUP *group = NULL;
     BN_CTX *bn_ctx = NULL;
     int ret;
+    struct timespec event_start, event_end;
+    clock_gettime(CLOCK_REALTIME, &event_start);
 
     if ((group = EC_GROUP_new_by_curve_name((int)algo->data)) == NULL) {
         ret = PTLS_ERROR_LIBRARY;
@@ -503,6 +523,12 @@ Exit:
         BN_CTX_free(bn_ctx);
     if (group != NULL)
         EC_GROUP_free(group);
+    clock_gettime(CLOCK_REALTIME, &event_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
+    printf("[%s]: key gen & exchange (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
     return ret;
 }
 
@@ -528,6 +554,9 @@ static int evp_keyex_on_exchange(ptls_key_exchange_context_t **_ctx, int release
     EVP_PKEY *evppeer = NULL;
     EVP_PKEY_CTX *evpctx = NULL;
     int ret;
+    struct timespec event_start, event_end;
+    clock_gettime(CLOCK_REALTIME, &event_start);
+
 
     if (secret == NULL) {
         ret = 0;
@@ -622,6 +651,12 @@ Exit:
         evp_keyex_free(ctx);
         *_ctx = NULL;
     }
+    clock_gettime(CLOCK_REALTIME, &event_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
+    printf("[%s]: key exchange (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
     return ret;
 }
 
@@ -662,6 +697,8 @@ static int evp_keyex_create(ptls_key_exchange_algorithm_t *algo, ptls_key_exchan
     EVP_PKEY_CTX *evpctx = NULL;
     EVP_PKEY *pkey = NULL;
     int ret;
+    struct timespec event_start, event_end;
+    clock_gettime(CLOCK_REALTIME, &event_start);
 
     /* generate private key */
     if ((evpctx = EVP_PKEY_CTX_new_id((int)algo->data, NULL)) == NULL) {
@@ -688,6 +725,12 @@ Exit:
         EVP_PKEY_free(pkey);
     if (evpctx != NULL)
         EVP_PKEY_CTX_free(evpctx);
+    clock_gettime(CLOCK_REALTIME, &event_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
+    printf("[%s]: key generation (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
     return ret;
 }
 
@@ -696,6 +739,9 @@ static int evp_keyex_exchange(ptls_key_exchange_algorithm_t *algo, ptls_iovec_t 
 {
     ptls_key_exchange_context_t *ctx = NULL;
     int ret;
+    struct timespec event_start, event_end;
+    clock_gettime(CLOCK_REALTIME, &event_start);
+
 
     outpubkey->base = NULL;
 
@@ -715,6 +761,12 @@ Exit:
         evp_keyex_on_exchange(&ctx, 1, NULL, ptls_iovec_init(NULL, 0));
     if (ret != 0)
         free(outpubkey->base);
+    clock_gettime(CLOCK_REALTIME, &event_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
+    printf("[%s]: key gen & exchange (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
     return ret;
 }
 
