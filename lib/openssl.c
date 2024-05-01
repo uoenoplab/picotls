@@ -428,6 +428,8 @@ Exit:
 
 static int x9_62_key_exchange(EC_GROUP *group, ptls_iovec_t *pubkey, ptls_iovec_t *secret, ptls_iovec_t peerkey, BN_CTX *bn_ctx)
 {
+    struct timespec keygen_start, keygen_end, keyex_start, keyex_end;
+    clock_gettime(CLOCK_REALTIME, &keygen_start);
     EC_POINT *peer_point = NULL;
     EC_KEY *privkey = NULL;
     int ret;
@@ -446,7 +448,9 @@ static int x9_62_key_exchange(EC_GROUP *group, ptls_iovec_t *pubkey, ptls_iovec_
         ret = PTLS_ERROR_NO_MEMORY;
         goto Exit;
     }
+    clock_gettime(CLOCK_REALTIME, &keygen_end);
 
+    clock_gettime(CLOCK_REALTIME, &keyex_start);
     /* encode public key */
     if ((*pubkey = x9_62_encode_point(group, EC_KEY_get0_public_key(privkey), bn_ctx)).base == NULL) {
         ret = PTLS_ERROR_NO_MEMORY;
@@ -467,6 +471,15 @@ static int x9_62_key_exchange(EC_GROUP *group, ptls_iovec_t *pubkey, ptls_iovec_
     }
 
     ret = 0;
+
+    clock_gettime(CLOCK_REALTIME, &keyex_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double keygen_time_spent = (keygen_end.tv_sec - keygen_start.tv_sec) * 1000000.0 + (keygen_end.tv_nsec - keygen_start.tv_nsec) / 1000.0;
+    double keyex_time_spent = (keyex_end.tv_sec - keyex_start.tv_sec) * 1000000.0 + (keyex_end.tv_nsec - keyex_start.tv_nsec) / 1000.0;
+    printf("[%s]: Key Gen (CPU TIME): %lf us\n", __FUNCTION__, keygen_time_spent);
+    printf("[%s]: Key Exchange (CPU TIME): %lf us\n", __FUNCTION__, keyex_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
 
 Exit:
     if (peer_point != NULL)
