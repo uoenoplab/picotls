@@ -2308,6 +2308,7 @@ static int send_client_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptls_
     uint8_t binder_key[PTLS_MAX_DIGEST_SIZE];
     ptls_buffer_t encoded_ch_inner;
     int ret, is_second_flight = tls->key_schedule != NULL;
+    struct timespec keygen_start, keygen_end, chlo_start, chlo_end;
 
     ptls_buffer_init(&encoded_ch_inner, "", 0);
 
@@ -2360,6 +2361,7 @@ static int send_client_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptls_
         }
     }
 
+    clock_gettime(CLOCK_REALTIME, &keygen_start);
     /* use the default key share if still not undetermined */
     if (tls->key_share == NULL && !(properties != NULL && properties->client.negotiate_before_key_exchange))
         tls->key_share = tls->ctx->key_exchanges[0];
@@ -2380,7 +2382,9 @@ static int send_client_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptls_
         if ((ret = key_schedule_extract(tls->key_schedule, resumption_secret)) != 0)
             goto Exit;
     }
+    clock_gettime(CLOCK_REALTIME, &keygen_end);
 
+    clock_gettime(CLOCK_REALTIME, &chlo_start);
     /* start generating CH */
     if ((ret = emitter->begin_message(emitter)) != 0)
         goto Exit;
@@ -2490,6 +2494,14 @@ static int send_client_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptls_
     }
     tls->state = cookie == NULL ? PTLS_STATE_CLIENT_EXPECT_SERVER_HELLO : PTLS_STATE_CLIENT_EXPECT_SECOND_SERVER_HELLO;
     ret = PTLS_ERROR_IN_PROGRESS;
+    clock_gettime(CLOCK_REALTIME, &chlo_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double keygen_time_spent = (keygen_end.tv_sec - keygen_start.tv_sec) * 1000000.0 + (keygen_end.tv_nsec - keygen_start.tv_nsec) / 1000.0;
+    double chlo_time_spent = (chlo_end.tv_sec - chlo_start.tv_sec) * 1000000.0 + (chlo_end.tv_nsec - chlo_start.tv_nsec) / 1000.0;
+    printf("[%s]: 1.1 Key & Key Schedule Gen (CPU TIME): %lf us\n", __FUNCTION__, keygen_time_spent);
+    printf("[%s]: 1.2 Gen CHLO (CPU TIME): %lf us\n", __FUNCTION__, chlo_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
 
 Exit:
     ptls_buffer_dispose(&encoded_ch_inner);
@@ -2734,7 +2746,9 @@ static int client_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
     struct st_ptls_server_hello_t sh;
     ptls_iovec_t ecdh_secret = {NULL};
     int ret;
+    struct timespec shlo_start, shlo_end, keyex_start, keyex_end;
 
+    clock_gettime(CLOCK_REALTIME, &shlo_start);
     if ((ret = decode_server_hello(tls, &sh, message.base + PTLS_HANDSHAKE_HEADER_SIZE, message.base + message.len)) != 0)
         goto Exit;
     if (!(sh.legacy_session_id.len == tls->client.legacy_session_id.len &&
@@ -2785,7 +2799,9 @@ static int client_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
         tls->key_schedule->hashes[0].ctx_outer->final(tls->key_schedule->hashes[0].ctx_outer, NULL, PTLS_HASH_FINAL_MODE_FREE);
         tls->key_schedule->hashes[0].ctx_outer = NULL;
     }
+    clock_gettime(CLOCK_REALTIME, &shlo_end);
 
+    clock_gettime(CLOCK_REALTIME, &keyex_start);
     ptls__key_schedule_update_hash(tls->key_schedule, message.base, message.len, 0);
 
     if (sh.peerkey.base != NULL) {
@@ -2811,6 +2827,14 @@ static int client_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
         if ((ret = setup_traffic_protection(tls, 1, "c hs traffic", 2, 0, 0)) != 0)
             goto Exit;
     }
+    clock_gettime(CLOCK_REALTIME, &keyex_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double shlo_time_spent = (shlo_end.tv_sec - shlo_start.tv_sec) * 1000000.0 + (shlo_end.tv_nsec - shlo_start.tv_nsec) / 1000.0;
+    double keyex_time_spent = (keyex_end.tv_sec - keyex_start.tv_sec) * 1000000.0 + (keyex_end.tv_nsec - keyex_start.tv_nsec) / 1000.0;
+    printf("[%s]: 2.1 Process SHLO (CPU TIME): %lf us\n", __FUNCTION__, shlo_time_spent);
+    printf("[%s]: 2.2 Key EX & Derive Secret (CPU TIME): %lf us\n", __FUNCTION__, keyex_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
 
     tls->state = PTLS_STATE_CLIENT_EXPECT_ENCRYPTED_EXTENSIONS;
     ret = PTLS_ERROR_IN_PROGRESS;
@@ -2857,6 +2881,9 @@ static int report_unknown_extensions(ptls_t *tls, ptls_handshake_properties_t *p
 
 static int client_handle_encrypted_extensions(ptls_t *tls, ptls_iovec_t message, ptls_handshake_properties_t *properties)
 {
+    struct timespec event_start, event_end;
+    clock_gettime(CLOCK_REALTIME, &event_start);
+
     const uint8_t *src = message.base + PTLS_HANDSHAKE_HEADER_SIZE, *const end = message.base + message.len;
     uint16_t type;
     static const ptls_raw_extension_t no_unknown_extensions = {UINT16_MAX};
@@ -2969,6 +2996,13 @@ static int client_handle_encrypted_extensions(ptls_t *tls, ptls_iovec_t message,
     tls->state =
         tls->is_psk_handshake ? PTLS_STATE_CLIENT_EXPECT_FINISHED : PTLS_STATE_CLIENT_EXPECT_CERTIFICATE_REQUEST_OR_CERTIFICATE;
     ret = PTLS_ERROR_IN_PROGRESS;
+
+    clock_gettime(CLOCK_REALTIME, &event_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
+    printf("[%s]: 3 Process EE (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
 
 Exit:
     if (unknown_extensions != &no_unknown_extensions)
@@ -3160,10 +3194,12 @@ static int client_handle_certificate_request(ptls_t *tls, ptls_iovec_t message, 
 
 static int handle_certificate(ptls_t *tls, const uint8_t *src, const uint8_t *end, int *got_certs)
 {
+    struct timespec decert_start, decert_end, vrfcert_start, vrfcert_end;
     ptls_iovec_t certs[16];
     size_t num_certs = 0;
     int ret = 0;
 
+    clock_gettime(CLOCK_REALTIME, &decert_start);
     /* certificate request context */
     ptls_decode_open_block(src, end, 1, {
         if (src != end) {
@@ -3189,7 +3225,9 @@ static int handle_certificate(ptls_t *tls, const uint8_t *src, const uint8_t *en
             });
         }
     });
+    clock_gettime(CLOCK_REALTIME, &decert_end);
 
+    clock_gettime(CLOCK_REALTIME, &vrfcert_start);
     if (tls->ctx->verify_certificate != NULL) {
         const char *server_name = NULL;
         if (!ptls_is_server(tls)) {
@@ -3203,8 +3241,17 @@ static int handle_certificate(ptls_t *tls, const uint8_t *src, const uint8_t *en
                                                     &tls->certificate_verify.verify_ctx, certs, num_certs)) != 0)
             goto Exit;
     }
+    clock_gettime(CLOCK_REALTIME, &vrfcert_end);
 
     *got_certs = num_certs != 0;
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double decert_time_spent = (decert_end.tv_sec - decert_start.tv_sec) * 1000000.0 + (decert_end.tv_nsec - decert_start.tv_nsec) / 1000.0;
+    double vrfcert_time_spent = (vrfcert_end.tv_sec - vrfcert_start.tv_sec) * 1000000.0 + (vrfcert_end.tv_nsec - vrfcert_start.tv_nsec) / 1000.0;
+    printf("[%s]: 4.1 Decode Cert (CPU TIME): %lf us\n", __FUNCTION__, decert_time_spent);
+    printf("[%s]: 4.2 Verify Cert (CPU TIME): %lf us\n", __FUNCTION__, vrfcert_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
+
 
 Exit:
     return ret;
@@ -3303,6 +3350,7 @@ static int server_handle_certificate(ptls_t *tls, ptls_iovec_t message)
 
 static int handle_certificate_verify(ptls_t *tls, ptls_iovec_t message, const char *context_string)
 {
+    struct timespec hash_start, hash_end, vrf_start, vrf_end;
     const uint8_t *src = message.base + PTLS_HANDSHAKE_HEADER_SIZE, *const end = message.base + message.len;
     uint16_t algo;
     ptls_iovec_t signature;
@@ -3310,6 +3358,7 @@ static int handle_certificate_verify(ptls_t *tls, ptls_iovec_t message, const ch
     size_t signdata_size;
     int ret;
 
+    clock_gettime(CLOCK_REALTIME, &hash_start);
     /* decode */
     if ((ret = ptls_decode16(&algo, &src, end)) != 0)
         goto Exit;
@@ -3319,12 +3368,16 @@ static int handle_certificate_verify(ptls_t *tls, ptls_iovec_t message, const ch
     });
 
     signdata_size = build_certificate_verify_signdata(signdata, tls->key_schedule, context_string);
+    clock_gettime(CLOCK_REALTIME, &hash_end);
+
+    clock_gettime(CLOCK_REALTIME, &vrf_start);
     if (tls->certificate_verify.cb != NULL) {
         ret = tls->certificate_verify.cb(tls->certificate_verify.verify_ctx, algo, ptls_iovec_init(signdata, signdata_size),
                                          signature);
     } else {
         ret = 0;
     }
+    clock_gettime(CLOCK_REALTIME, &vrf_end);
     ptls_clear_memory(signdata, signdata_size);
     tls->certificate_verify.cb = NULL;
     if (ret != 0) {
@@ -3332,6 +3385,14 @@ static int handle_certificate_verify(ptls_t *tls, ptls_iovec_t message, const ch
     }
 
     ptls__key_schedule_update_hash(tls->key_schedule, message.base, message.len, 0);
+
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double hash_time_spent = (hash_end.tv_sec - hash_start.tv_sec) * 1000000.0 + (hash_end.tv_nsec - hash_start.tv_nsec) / 1000.0;
+    double vrf_time_spent = (vrf_end.tv_sec - vrf_start.tv_sec) * 1000000.0 + (vrf_end.tv_nsec - vrf_start.tv_nsec) / 1000.0;
+    printf("[%s]: 5.1 Build Sign Data (CPU TIME): %lf us\n", __FUNCTION__, hash_time_spent);
+    printf("[%s]: 5.2 Verify CertVerify (CPU TIME): %lf us\n", __FUNCTION__, vrf_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
 
 Exit:
     return ret;
@@ -3363,6 +3424,8 @@ static int server_handle_certificate_verify(ptls_t *tls, ptls_iovec_t message)
 
 static int client_handle_finished(ptls_t *tls, ptls_message_emitter_t *emitter, ptls_iovec_t message)
 {
+    struct timespec event_start, event_end;
+    clock_gettime(CLOCK_REALTIME, &event_start);
     uint8_t send_secret[PTLS_MAX_DIGEST_SIZE];
     int alert_ech_required = tls->ech.offered && !ptls_is_ech_handshake(tls, NULL, NULL, NULL), ret;
 
@@ -3415,6 +3478,13 @@ static int client_handle_finished(ptls_t *tls, ptls_message_emitter_t *emitter, 
     /* if ECH was rejected, close the connection with ECH_REQUIRED alert after verifying messages up to Finished */
     if (alert_ech_required)
         ret = PTLS_ALERT_ECH_REQUIRED;
+
+    clock_gettime(CLOCK_REALTIME, &event_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
+    printf("[%s]: 6 Handle Finish (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
 
 Exit:
     ptls_clear_memory(send_secret, sizeof(send_secret));
@@ -4234,6 +4304,8 @@ static int server_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
     size_t psk_index = SIZE_MAX;
     ptls_iovec_t pubkey = {0}, ecdh_secret = {0};
     int accept_early_data = 0, is_second_flight = tls->state == PTLS_STATE_SERVER_EXPECT_SECOND_CLIENT_HELLO, ret;
+    struct timespec chlo_start, chlo_end, ech_start, ech_end, keygen_start, keygen_end, keyex_start, keyex_end,
+        shlo_start, shlo_end, ee_start, ee_end, cert_start, cert_end;
 
     ptls_buffer_init(&ech.ch_inner, "", 0);
 
@@ -4245,6 +4317,7 @@ static int server_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
     *ch = (struct st_ptls_client_hello_t){.unknown_extensions = {{UINT16_MAX}}};
 
     /* decode ClientHello */
+    clock_gettime(CLOCK_REALTIME, &chlo_start);
     if ((ret = decode_client_hello(tls->ctx, ch, message.base + PTLS_HANDSHAKE_HEADER_SIZE, message.base + message.len, properties,
                                    tls)) != 0)
         goto Exit;
@@ -4267,9 +4340,11 @@ static int server_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
             }
         }
     }
+    clock_gettime(CLOCK_REALTIME, &chlo_end);
 
     /* ECH */
     if (ch->ech.payload.base != NULL) {
+        clock_gettime(CLOCK_REALTIME, &ech_start);
         if (ch->ech.type != PTLS_ECH_CLIENT_HELLO_TYPE_OUTER) {
             ret = PTLS_ALERT_ILLEGAL_PARAMETER;
             goto Exit;
@@ -4326,6 +4401,7 @@ static int server_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
                 tls->ech.aead = NULL;
             }
         }
+        clock_gettime(CLOCK_REALTIME, &ech_end);
     } else if (tls->ech.offered) {
         assert(is_second_flight);
         ret = PTLS_ALERT_ILLEGAL_PARAMETER;
@@ -4578,6 +4654,7 @@ static int server_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
 
     /* run key-exchange, to obtain pubkey and secret */
     if (mode != HANDSHAKE_MODE_PSK) {
+        clock_gettime(CLOCK_REALTIME, &keyex_start);
         if (key_share.algorithm == NULL) {
             ret = ch->key_shares.base != NULL ? PTLS_ALERT_HANDSHAKE_FAILURE : PTLS_ALERT_MISSING_EXTENSION;
             goto Exit;
@@ -4585,8 +4662,10 @@ static int server_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
         if ((ret = key_share.algorithm->exchange(key_share.algorithm, &pubkey, &ecdh_secret, key_share.peer_key)) != 0)
             goto Exit;
         tls->key_share = key_share.algorithm;
+        clock_gettime(CLOCK_REALTIME, &keyex_end);
     }
 
+    clock_gettime(CLOCK_REALTIME, &shlo_start);
     { /* send ServerHello */
         size_t ech_confirm_off = 0;
         EMIT_SERVER_HELLO(
@@ -4645,8 +4724,10 @@ static int server_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
         if (ch->psk.early_data_indication)
             tls->server.early_data_skipped_bytes = 0;
     }
+    clock_gettime(CLOCK_REALTIME, &shlo_end);
 
     /* send EncryptedExtensions */
+    clock_gettime(CLOCK_REALTIME, &ee_start);
     ptls_push_message(emitter, tls->key_schedule, PTLS_HANDSHAKE_TYPE_ENCRYPTED_EXTENSIONS, {
         ptls_buffer_t *sendbuf = emitter->buf;
         ptls_buffer_push_block(sendbuf, 2, {
@@ -4680,6 +4761,7 @@ static int server_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
                 goto Exit;
         });
     });
+    clock_gettime(CLOCK_REALTIME, &ee_end);
 
     if (mode == HANDSHAKE_MODE_FULL) {
         /* send certificate request if client authentication is activated */
@@ -4717,9 +4799,12 @@ static int server_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
         }
 
         /* send certificate */
+        clock_gettime(CLOCK_REALTIME, &cert_start);
         if ((ret = send_certificate(tls, emitter, &ch->signature_algorithms, ptls_iovec_init(NULL, 0), ch->status_request,
                                     ch->cert_compression_algos.list, ch->cert_compression_algos.count)) != 0)
             goto Exit;
+        clock_gettime(CLOCK_REALTIME, &cert_end);
+
         /* send certificateverify, finished, and complete the handshake */
         if ((ret = server_finish_handshake(tls, emitter, 1, &ch->signature_algorithms)) != 0)
             goto Exit;
@@ -4728,6 +4813,25 @@ static int server_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
         if ((ret = server_finish_handshake(tls, emitter, 0, NULL)) != 0)
             goto Exit;
     }
+
+//    struct timespec chlo_start, chlo_end, ech_start, ech_end, keygen_start, keygen_end, keyex_start, keyex_end,
+//        shlo_start, shlo_end, ee_start, ee_end, cert_start, cert_end;
+
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double chlo_time_spent = (chlo_end.tv_sec - chlo_start.tv_sec) * 1000000.0 + (chlo_end.tv_nsec - chlo_start.tv_nsec) / 1000.0;
+    double ech_time_spent = (ech_end.tv_sec - ech_start.tv_sec) * 1000000.0 + (ech_end.tv_nsec - ech_start.tv_nsec) / 1000.0;
+    double keyex_time_spent = (keyex_end.tv_sec - keyex_start.tv_sec) * 1000000.0 + (keyex_end.tv_nsec - keyex_start.tv_nsec) / 1000.0;
+    double shlo_time_spent = (shlo_end.tv_sec - shlo_start.tv_sec) * 1000000.0 + (shlo_end.tv_nsec - shlo_start.tv_nsec) / 1000.0;
+    double ee_time_spent = (ee_end.tv_sec - ee_start.tv_sec) * 1000000.0 + (ee_end.tv_nsec - ee_start.tv_nsec) / 1000.0;
+    double cert_time_spent = (cert_end.tv_sec - cert_start.tv_sec) * 1000000.0 + (cert_end.tv_nsec - cert_start.tv_nsec) / 1000.0;
+    printf("1 Process CHLO(CPU TIME): %lf us\n", chlo_time_spent);
+    printf("2.1 Process ECH (CPU TIME): %lf us\n", ech_time_spent);
+    printf("2.2 Key EX (CPU TIME): %lf us\n", keyex_time_spent);
+    printf("2.3 Gen SHLO (CPU TIME): %lf us\n", shlo_time_spent);
+    printf("2.4 Gen EE (CPU TIME): %lf us\n", ee_time_spent);
+    printf("2.5 Encode Cert (CPU TIME): %lf us\n", cert_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
 
 Exit:
     free(pubkey.base);
@@ -4749,8 +4853,10 @@ static int server_finish_handshake(ptls_t *tls, ptls_message_emitter_t *emitter,
                                    struct st_ptls_signature_algorithms_t *signature_algorithms)
 {
     int ret;
+    struct timespec certvrf_start, certvrf_end, fin_start, fin_end, desct_start, desct_end, ss_start, ss_end;
 
     if (send_cert_verify) {
+        clock_gettime(CLOCK_REALTIME, &certvrf_start);
         if ((ret = send_certificate_verify(tls, emitter, signature_algorithms, PTLS_SERVER_CERTIFICATE_VERIFY_CONTEXT_STRING)) !=
             0) {
             if (ret == PTLS_ERROR_ASYNC_OPERATION) {
@@ -4758,12 +4864,14 @@ static int server_finish_handshake(ptls_t *tls, ptls_message_emitter_t *emitter,
             }
             goto Exit;
         }
+        clock_gettime(CLOCK_REALTIME, &certvrf_end);
     }
 
     if ((ret = send_finished(tls, emitter)) != 0)
         goto Exit;
 
     assert(tls->key_schedule->generation == 2);
+    clock_gettime(CLOCK_REALTIME, &desct_start);
     if ((ret = key_schedule_extract(tls->key_schedule, ptls_iovec_init(NULL, 0))) != 0)
         goto Exit;
     if ((ret = setup_traffic_protection(tls, 1, "s ap traffic", 3, 0, 0)) != 0)
@@ -4772,6 +4880,7 @@ static int server_finish_handshake(ptls_t *tls, ptls_message_emitter_t *emitter,
         goto Exit;
     if ((ret = derive_exporter_secret(tls, 0)) != 0)
         goto Exit;
+    clock_gettime(CLOCK_REALTIME, &desct_end);
 
     if (tls->pending_handshake_secret != NULL) {
         if (tls->ctx->omit_end_of_early_data) {
@@ -4789,8 +4898,10 @@ static int server_finish_handshake(ptls_t *tls, ptls_message_emitter_t *emitter,
 
     /* send session ticket if necessary */
     if (tls->server.can_send_session_ticket && tls->ctx->ticket_lifetime != 0) {
+        clock_gettime(CLOCK_REALTIME, &ss_start);
         if ((ret = send_session_ticket(tls, emitter)) != 0)
             goto Exit;
+        clock_gettime(CLOCK_REALTIME, &ss_end);
     }
 
     if (tls->ctx->require_client_authentication) {
@@ -4798,6 +4909,18 @@ static int server_finish_handshake(ptls_t *tls, ptls_message_emitter_t *emitter,
     } else {
         ret = 0;
     }
+
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double certvrf_time_spent = (certvrf_end.tv_sec - certvrf_start.tv_sec) * 1000000.0 + (certvrf_end.tv_nsec - certvrf_start.tv_nsec) / 1000.0;
+    double fin_time_spent = (fin_end.tv_sec - fin_start.tv_sec) * 1000000.0 + (fin_end.tv_nsec - fin_start.tv_nsec) / 1000.0;
+    double desct_time_spent = (desct_end.tv_sec - desct_start.tv_sec) * 1000000.0 + (desct_end.tv_nsec - desct_start.tv_nsec) / 1000.0;
+    double ss_time_spent = (ss_end.tv_sec - ss_start.tv_sec) * 1000000.0 + (ss_end.tv_nsec - ss_start.tv_nsec) / 1000.0;
+    printf("[%s]: 2.6 Gen Certvrf(CPU TIME): %lf us\n", __FUNCTION__, certvrf_time_spent);
+    printf("[%s]: 2.7 Gen Finish (CPU TIME): %lf us\n", __FUNCTION__, fin_time_spent);
+    printf("[%s]: 2.8 Derive ap Secret (CPU TIME): %lf us\n", __FUNCTION__, desct_time_spent);
+    printf("[%s]: 2.9 Gen Session Ticket (CPU TIME): %lf us\n", __FUNCTION__, ss_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
 
 Exit:
     return ret;
@@ -4820,6 +4943,9 @@ Exit:
 
 static int server_handle_finished(ptls_t *tls, ptls_iovec_t message)
 {
+    struct timespec event_start, event_end;
+    clock_gettime(CLOCK_REALTIME, &event_start);
+
     int ret;
 
     if ((ret = verify_finished(tls, message)) != 0)
@@ -4831,6 +4957,13 @@ static int server_handle_finished(ptls_t *tls, ptls_iovec_t message)
         return ret;
 
     ptls__key_schedule_update_hash(tls->key_schedule, message.base, message.len, 0);
+
+    clock_gettime(CLOCK_REALTIME, &event_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
+    printf("[%s]: 3 Process Finished (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
 
     tls->state = PTLS_STATE_SERVER_POST_HANDSHAKE;
     return 0;

@@ -203,6 +203,8 @@ void ptls_openssl_random_bytes(void *buf, size_t len)
 
 static EC_KEY *ecdh_gerenate_key(EC_GROUP *group)
 {
+    struct timespec event_start, event_end;
+    clock_gettime(CLOCK_REALTIME, &event_start);
     EC_KEY *key;
 
     if ((key = EC_KEY_new()) == NULL)
@@ -211,12 +213,21 @@ static EC_KEY *ecdh_gerenate_key(EC_GROUP *group)
         EC_KEY_free(key);
         return NULL;
     }
+    clock_gettime(CLOCK_REALTIME, &event_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
+    printf("[%s]: EC Key Gen (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
 
     return key;
 }
 
 static int ecdh_calc_secret(ptls_iovec_t *out, const EC_GROUP *group, EC_KEY *privkey, EC_POINT *peer_point)
 {
+    struct timespec event_start, event_end;
+    clock_gettime(CLOCK_REALTIME, &event_start);
+
     ptls_iovec_t secret;
     int ret;
 
@@ -229,6 +240,14 @@ static int ecdh_calc_secret(ptls_iovec_t *out, const EC_GROUP *group, EC_KEY *pr
         ret = PTLS_ALERT_HANDSHAKE_FAILURE; /* ??? */
         goto Exit;
     }
+
+    clock_gettime(CLOCK_REALTIME, &event_end);
+    /* Display measured results*/
+    printf("\n\n-----------------Time measurement retults-----------------\n");
+    double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
+    printf("[%s]: ECDH Calculation (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("--------------------Time measurement retults end-----------------\n\n");
+
     ret = 0;
 
 Exit:
