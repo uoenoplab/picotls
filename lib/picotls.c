@@ -2499,8 +2499,8 @@ static int send_client_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptls_
     printf("\n\n-----------------Time measurement retults-----------------\n");
     double keygen_time_spent = (keygen_end.tv_sec - keygen_start.tv_sec) * 1000000.0 + (keygen_end.tv_nsec - keygen_start.tv_nsec) / 1000.0;
     double chlo_time_spent = (chlo_end.tv_sec - chlo_start.tv_sec) * 1000000.0 + (chlo_end.tv_nsec - chlo_start.tv_nsec) / 1000.0;
-    printf("[%s]: 1.1 Key & Key Schedule Gen (CPU TIME): %lf us\n", __FUNCTION__, keygen_time_spent);
-    printf("[%s]: 1.2 Gen CHLO (CPU TIME): %lf us\n", __FUNCTION__, chlo_time_spent);
+    printf("1.1 Key & Key Schedule Gen (CPU TIME): %lf us\n", keygen_time_spent);
+    printf("1.2 Gen CHLO (CPU TIME): %lf us\n", chlo_time_spent);
     printf("--------------------Time measurement retults end-----------------\n\n");
 
 Exit:
@@ -2832,8 +2832,8 @@ static int client_handle_hello(ptls_t *tls, ptls_message_emitter_t *emitter, ptl
     printf("\n\n-----------------Time measurement retults-----------------\n");
     double shlo_time_spent = (shlo_end.tv_sec - shlo_start.tv_sec) * 1000000.0 + (shlo_end.tv_nsec - shlo_start.tv_nsec) / 1000.0;
     double keyex_time_spent = (keyex_end.tv_sec - keyex_start.tv_sec) * 1000000.0 + (keyex_end.tv_nsec - keyex_start.tv_nsec) / 1000.0;
-    printf("[%s]: 2.1 Process SHLO (CPU TIME): %lf us\n", __FUNCTION__, shlo_time_spent);
-    printf("[%s]: 2.2 Key EX & Derive Secret (CPU TIME): %lf us\n", __FUNCTION__, keyex_time_spent);
+    printf("2.1 Process SHLO (CPU TIME): %lf us\n", shlo_time_spent);
+    printf("2.2 Key EX & Derive Secret (CPU TIME): %lf us\n", keyex_time_spent);
     printf("--------------------Time measurement retults end-----------------\n\n");
 
     tls->state = PTLS_STATE_CLIENT_EXPECT_ENCRYPTED_EXTENSIONS;
@@ -3001,7 +3001,7 @@ static int client_handle_encrypted_extensions(ptls_t *tls, ptls_iovec_t message,
     /* Display measured results*/
     printf("\n\n-----------------Time measurement retults-----------------\n");
     double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
-    printf("[%s]: 3 Process EE (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("3 Process EE (CPU TIME): %lf us\n", event_time_spent);
     printf("--------------------Time measurement retults end-----------------\n\n");
 
 Exit:
@@ -3248,8 +3248,8 @@ static int handle_certificate(ptls_t *tls, const uint8_t *src, const uint8_t *en
     printf("\n\n-----------------Time measurement retults-----------------\n");
     double decert_time_spent = (decert_end.tv_sec - decert_start.tv_sec) * 1000000.0 + (decert_end.tv_nsec - decert_start.tv_nsec) / 1000.0;
     double vrfcert_time_spent = (vrfcert_end.tv_sec - vrfcert_start.tv_sec) * 1000000.0 + (vrfcert_end.tv_nsec - vrfcert_start.tv_nsec) / 1000.0;
-    printf("[%s]: 4.1 Decode Cert (CPU TIME): %lf us\n", __FUNCTION__, decert_time_spent);
-    printf("[%s]: 4.2 Verify Cert (CPU TIME): %lf us\n", __FUNCTION__, vrfcert_time_spent);
+    printf("4.1 Decode Cert (CPU TIME): %lf us\n", decert_time_spent);
+    printf("4.2 Verify Cert (CPU TIME): %lf us\n", vrfcert_time_spent);
     printf("--------------------Time measurement retults end-----------------\n\n");
 
 
@@ -3390,8 +3390,8 @@ static int handle_certificate_verify(ptls_t *tls, ptls_iovec_t message, const ch
     printf("\n\n-----------------Time measurement retults-----------------\n");
     double hash_time_spent = (hash_end.tv_sec - hash_start.tv_sec) * 1000000.0 + (hash_end.tv_nsec - hash_start.tv_nsec) / 1000.0;
     double vrf_time_spent = (vrf_end.tv_sec - vrf_start.tv_sec) * 1000000.0 + (vrf_end.tv_nsec - vrf_start.tv_nsec) / 1000.0;
-    printf("[%s]: 5.1 Build Sign Data (CPU TIME): %lf us\n", __FUNCTION__, hash_time_spent);
-    printf("[%s]: 5.2 Verify CertVerify (CPU TIME): %lf us\n", __FUNCTION__, vrf_time_spent);
+    printf("5.1 Build Sign Data (CPU TIME): %lf us\n", hash_time_spent);
+    printf("5.2 Verify CertVerify (CPU TIME): %lf us\n", vrf_time_spent);
     printf("--------------------Time measurement retults end-----------------\n\n");
 
 Exit:
@@ -3483,7 +3483,7 @@ static int client_handle_finished(ptls_t *tls, ptls_message_emitter_t *emitter, 
     /* Display measured results*/
     printf("\n\n-----------------Time measurement retults-----------------\n");
     double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
-    printf("[%s]: 6 Handle Finish (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("6 Handle Finish (CPU TIME): %lf us\n", event_time_spent);
     printf("--------------------Time measurement retults end-----------------\n\n");
 
 Exit:
@@ -4916,10 +4916,10 @@ static int server_finish_handshake(ptls_t *tls, ptls_message_emitter_t *emitter,
     double fin_time_spent = (fin_end.tv_sec - fin_start.tv_sec) * 1000000.0 + (fin_end.tv_nsec - fin_start.tv_nsec) / 1000.0;
     double desct_time_spent = (desct_end.tv_sec - desct_start.tv_sec) * 1000000.0 + (desct_end.tv_nsec - desct_start.tv_nsec) / 1000.0;
     double ss_time_spent = (ss_end.tv_sec - ss_start.tv_sec) * 1000000.0 + (ss_end.tv_nsec - ss_start.tv_nsec) / 1000.0;
-    printf("[%s]: 2.6 Gen Certvrf(CPU TIME): %lf us\n", __FUNCTION__, certvrf_time_spent);
-    printf("[%s]: 2.7 Gen Finish (CPU TIME): %lf us\n", __FUNCTION__, fin_time_spent);
-    printf("[%s]: 2.8 Derive ap Secret (CPU TIME): %lf us\n", __FUNCTION__, desct_time_spent);
-    printf("[%s]: 2.9 Gen Session Ticket (CPU TIME): %lf us\n", __FUNCTION__, ss_time_spent);
+    printf("2.6 Gen Certvrf(CPU TIME): %lf us\n", certvrf_time_spent);
+    printf("2.7 Gen Finish (CPU TIME): %lf us\n", fin_time_spent);
+    printf("2.8 Derive ap Secret (CPU TIME): %lf us\n", desct_time_spent);
+    printf("2.9 Gen Session Ticket (CPU TIME): %lf us\n", ss_time_spent);
     printf("--------------------Time measurement retults end-----------------\n\n");
 
 Exit:
@@ -4962,7 +4962,7 @@ static int server_handle_finished(ptls_t *tls, ptls_iovec_t message)
     /* Display measured results*/
     printf("\n\n-----------------Time measurement retults-----------------\n");
     double event_time_spent = (event_end.tv_sec - event_start.tv_sec) * 1000000.0 + (event_end.tv_nsec - event_start.tv_nsec) / 1000.0;
-    printf("[%s]: 3 Process Finished (CPU TIME): %lf us\n", __FUNCTION__, event_time_spent);
+    printf("3 Process Finished (CPU TIME): %lf us\n", event_time_spent);
     printf("--------------------Time measurement retults end-----------------\n\n");
 
     tls->state = PTLS_STATE_SERVER_POST_HANDSHAKE;
