@@ -661,6 +661,6 @@ int main(int argc, char **argv)
     if (is_server) {
         return run_server((struct sockaddr *)&sa, salen, &ctx, input_file, &hsprop, request_key_update);
     } else {
-        return run_client((struct sockaddr *)&sa, salen, &ctx, host, input_file, &hsprop, request_key_update, keep_sender_open);
+        return run_client((struct sockaddr *)&sa, salen, &ctx, "test.example.com", input_file, &hsprop, request_key_update, keep_sender_open);
     }
 }
